@@ -1,0 +1,25 @@
+{
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.intelliSenseEngine": "default",
+
+    "clangd.arguments": [
+      "--background-index",
+      "--clang-tidy",
+      "--completion-style=detailed",
+      "--header-insertion=iwyu"
+    ],
+
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": false
+    },
+
+    "editor.parameterHints.enabled": true,
+    "editor.hover.enabled": true,
+    "editor.inlayHints.enabled": "on",
+
+    "editor.semanticHighlighting.enabled": true,
+    "C_Cpp.enhancedColorization": "enabled"
+}

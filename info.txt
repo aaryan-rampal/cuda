@@ -1,0 +1,94 @@
+1 CUDA devices
+
+Device 0: Quadro P4000
+  UUID: 015464d3bb2641ebe0cd65e38b5cf809
+  LUID: 
+  LUID Device Node Mask: 0
+  Total Global Memory: 8507949056 bytes
+  Shared Memory per Block: 49152 bytes
+  Registers per Block: 65536
+  Warp Size: 32
+  Mem Pitch: 2147483647
+  Max Threads per Block: 1024
+  Max Threads Dim: 1024 x 1024 x 64
+  Max Grid Size: 2147483647 x 65535 x 65535
+  Clock Rate: 1480000 kHz
+  Total Constant Memory: 65536 bytes
+  Compute Capability: 6.1
+  Texture Alignment: 512
+  Texture Pitch Alignment: 32
+  Device Overlap: 1
+  MultiProcessor Count: 14
+  Kernel Exec Timeout Enabled: 0
+  Integrated: 0
+  Can Map Host Memory: 1
+  Compute Mode: 0
+  Max Texture 1D: 131072
+  Max Texture 1D Mipmap: 16384
+  Max Texture 1D Linear: 268435456
+  Max Texture 2D: 131072 x 65536
+  Max Texture 2D Mipmap: 32768 x 32768
+  Max Texture 2D Linear: 131072 x 65000 x 2097120
+  Max Texture 2D Gather: 32768 x 32768
+  Max Texture 3D: 16384 x 16384 x 16384
+  Max Texture 3D Alt: 8192 x 8192 x 32768
+  Max Texture Cubemap: 32768
+  Max Texture 1D Layered: 32768 x 2048
+  Max Texture 2D Layered: 32768 x 32768 x 2048
+  Max Texture Cubemap Layered: 32768 x 2046
+  Max Surface 1D: 32768
+  Max Surface 2D: 131072 x 65536
+  Max Surface 3D: 16384 x 16384 x 16384
+  Max Surface 1D Layered: 32768 x 2048
+  Max Surface 2D Layered: 32768 x 32768 x 2048
+  Max Surface Cubemap: 32768
+  Max Surface Cubemap Layered: 32768 x 2046
+  Surface Alignment: 512
+  Concurrent Kernels: 1
+  ECC Enabled: 0
+  PCI Bus ID: 131
+  PCI Device ID: 0
+  PCI Domain ID: 0
+  TCC Driver: 0
+  Async Engine Count: 2
+  Unified Addressing: 1
+  Memory Clock Rate: 3802000 kHz
+  Memory Bus Width: 256 bits
+  L2 Cache Size: 2097152 bytes
+  Persisting L2 Cache Max Size: 0 bytes
+  Max Threads per MultiProcessor: 2048
+  Stream Priorities Supported: 1
+  Global L1 Cache Supported: 1
+  Local L1 Cache Supported: 1
+  Shared Memory per MultiProcessor: 98304 bytes
+  Registers per MultiProcessor: 65536
+  Managed Memory: 1
+  Is Multi-GPU Board: 0
+  Multi-GPU Board Group ID: 0
+  Host Native Atomic Supported: 0
+  Single to Double Precision Perf Ratio: 32
+  Pageable Memory Access: 0
+  Concurrent Managed Access: 1
+  Compute Preemption Supported: 1
+  Can Use Host Pointer For Registered Mem: 1
+  Cooperative Launch: 1
+  Cooperative Multi-Device Launch: 1
+  Shared Memory per Block Opt-in: 49152 bytes
+  Pageable Memory Access Uses Host Page Tables: 0
+  Direct Managed Mem Access From Host: 0
+  Max Blocks per MultiProcessor: 32
+  Access Policy Max Window Size: 0
+  Reserved Shared Memory per Block: 0 bytes
+  Host Register Supported: 1
+  Sparse CUDA Array Supported: 1
+  Host Register Read-Only Supported: 1
+  Timeline Semaphore Interop Supported: 1
+  Memory Pools Supported: 1
+  GPU Direct RDMA Supported: 1
+  GPU Direct RDMA Flush Writes Options: 1
+  GPU Direct RDMA Writes Ordering: 0
+  Memory Pool Supported Handle Types: 1
+  Deferred Mapping CUDA Array Supported: 1
+  IPC Event Supported: 1
+  Cluster Launch: 0
+  Unified Function Pointers: 0
