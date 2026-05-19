@@ -10,12 +10,6 @@
     } \
 }
 
-void mat_add(std::vector<int> &A, std::vector<int> &B, std::vector<int> &C, int n) {
-    for (int i = 0; i < n; i++) {
-        C[i] = A[i] + B[i];
-    }
-}
-
 bool verify(const std::vector<int>& A,
             const std::vector<int>& B,
             const std::vector<int>& C,
@@ -37,6 +31,21 @@ bool verify(const std::vector<int>& A,
     return true;
 }
 
+__global__ void mat_add_cuda_reversed(int *A, int *B, int *C, int width, int height, int n) {
+    // this is similar to mat_add_cuda EXCEPT
+    // we use threadIdx.x (fastest moving index) for row (slowest moving iterator)
+    // notice the difference in the kernel times
+
+    int row = threadIdx.x + blockDim.x * blockIdx.x;
+    int col = threadIdx.y + blockDim.y * blockIdx.y;
+    if (row >= height || col >= width)
+        return;
+
+    int i = row * width + col;
+
+    C[i] = A[i] + B[i];
+}
+
 __global__ void mat_add_cuda(int *A, int *B, int *C, int width, int height, int n) {
     // threadIdx.x moves fastest
     // for a 2D array A[i][j], we increment cols first then rows
@@ -55,7 +64,7 @@ __global__ void mat_add_cuda(int *A, int *B, int *C, int width, int height, int 
     C[i] = A[i] + B[i];
 }
 
-int main(){
+float call_cuda(bool reversed){
     int width = 5000, height = 7500;
     int n = height * width;
     std::vector<int> A(n), B(n), C(n, 0);
@@ -76,8 +85,14 @@ int main(){
     cudaMemcpy(d_B, B.data(), size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_C, C.data(), size, cudaMemcpyHostToDevice);
 
-    dim3 grid(width / 16 + 1, height / 16 + 1);
     dim3 block(16, 16);
+    dim3 grid;
+    if (reversed) {
+        grid = dim3(height / 16 + 1, width / 16 + 1);
+    } else {
+        grid = dim3(width / 16 + 1, height / 16 + 1);
+    }
+
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -85,15 +100,18 @@ int main(){
 
     cudaEventRecord(start);
 
-    mat_add_cuda<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
+    if (reversed) {
+        mat_add_cuda_unoptimized<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
+    } else {
+        mat_add_cuda<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
+    }
+
 
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
     float ms = 0;
     cudaEventElapsedTime(&ms, start, stop);
-
-    std::cout << "Kernel time: " << ms << " ms\n";
 
     cudaMemcpy(A.data(), d_A, size, cudaMemcpyDeviceToHost);
     cudaMemcpy(B.data(), d_B, size, cudaMemcpyDeviceToHost);
@@ -107,5 +125,19 @@ int main(){
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
-    return 0;
+
+    return ms;
+}
+
+/*
+   Run on NVIDIA GeForce RTX 3060
+   Normal kernel time: 1.54429
+   Reversed kernel time: 2.72595
+*/
+int main() {
+    float ms_normal = call_cuda(false);
+    float ms_reversed = call_cuda(true);
+
+    std::cout << "Normal kernel time: " << ms_normal << std::endl;
+    std::cout << "Reversed kernel time: " << ms_reversed << std::endl;
 }
