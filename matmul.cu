@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdio>
+#include <ctime>
 #include <iostream>
 #include <vector>
 
@@ -106,8 +107,7 @@ void fill_with_random(int *vec, int size) {
     }
 }
 
-float call_cpu() {
-    int a_1 = 50, a_2 = 75, a_3 = 80;
+float call_cpu(int a_1, int a_2, int a_3) {
     std::vector<std::vector<int>> A(a_1, std::vector<int>(a_2, 0));
     std::vector<std::vector<int>> B(a_2, std::vector<int>(a_3, 0));
     std::vector<std::vector<int>> C(a_1, std::vector<int>(a_3, 0));
@@ -147,9 +147,8 @@ __global__ void mat_mul(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
     }
 }
 
-float call_gpu() {
-    int a_1 = 3, a_2 = 3, a_3 = 3;
-    size_t size_A = a_1 * a_3, size_B = a_2 * a_3, size_C = a_1 * a_3;
+float call_gpu(int a_1, int a_2, int a_3) {
+    size_t size_A = a_1 * a_2, size_B = a_2 * a_3, size_C = a_1 * a_3;
     size_t mal_A = size_A * sizeof(int);
     size_t mal_B = size_B * sizeof(int);
     size_t mal_C = size_C * sizeof(int);
@@ -162,7 +161,7 @@ float call_gpu() {
         exit(EXIT_FAILURE);
     }
 
-    fill_with_random(A, a_1 * a_3);
+    fill_with_random(A, a_1 * a_2);
     fill_with_random(B, a_2 * a_3);
     for (int i = 0; i < size_C; i++) {
         C[i] = 0;
@@ -177,7 +176,7 @@ float call_gpu() {
     CHECK_CUDA(cudaMemcpy(d_C, C, mal_C, cudaMemcpyHostToDevice));
 
     int threads = 16;
-    dim3 grid(a_1 / threads + 1, a_3 / threads + 1);
+    dim3 grid((a_3 + threads - 1) / threads, (a_1 + threads - 1) / threads);
     dim3 block(threads, threads);
 
     cudaEvent_t start, stop;
@@ -204,13 +203,35 @@ float call_gpu() {
     CHECK_CUDA(cudaFree(d_A));
     CHECK_CUDA(cudaFree(d_B));
     CHECK_CUDA(cudaFree(d_C));
+    free(A);
+    free(B);
+    free(C);
 
     return ms;
 }
 
 int main() {
-    float ms = call_cpu();
-    std::cout << "CPU execution time: " << ms << " ms" << std::endl;
-    float ms_gpu = call_gpu();
-    std::cout << "GPU execution time: " << ms_gpu << " ms" << std::endl;
+    srand(time(NULL));
+    int a_1 = rand() % 10 + 1;
+    int a_2 = rand() % 10 + 1;
+    int a_3 = rand() % 10 + 1;
+
+    while (true) {
+        std::cout << "-----------------------------------" << std::endl;
+        std::cout << "Testing dimensions: " << a_1 << " x " << a_2 << " x " << a_3 << std::endl;
+        float ms_gpu = call_gpu(a_1, a_2, a_3);
+        std::cout << "GPU execution time: " << ms_gpu << " ms" << std::endl;
+
+        float ms_cpu = call_cpu(a_1, a_2, a_3);
+        std::cout << "CPU execution time: " << ms_cpu << " ms" << std::endl;
+
+        if (ms_cpu > 60000.0f) {
+            std::cout << "CPU execution time exceeded 60s. Stopping loop." << std::endl;
+            break;
+        }
+
+        a_1 *= 10;
+        a_2 *= 10;
+        a_3 *= 10;
+    }
 }
