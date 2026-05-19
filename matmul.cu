@@ -39,6 +39,23 @@ bool verify(const std::vector<std::vector<int>> &A, const std::vector<std::vecto
     return true;
 }
 
+bool verify(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
+    for (int i = 0; i < a_1; ++i) {
+        for (int j = 0; j < a_3; ++j) {
+            int expected = 0;
+            for (int k = 0; k < a_2; ++k) {
+                expected += A[i * a_2 + k] * B[k * a_3 + j];
+            }
+            if (C[i * a_3 + j] != expected) {
+                std::cerr << "Verification failed at (" << i << ", " << j << "): "
+                          << "expected " << expected << ", got " << C[i * a_3 + j] << "\n";
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void mat_mul(std::vector<std::vector<int>> &A, std::vector<std::vector<int>> &B,
              std::vector<std::vector<int>> &C) {
     assert(C.size() > 0);
@@ -102,11 +119,29 @@ float call_cpu() {
     return ms;
 }
 
+__global__ void mat_mul(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
+    int i = threadIdx.z + blockIdx.z * blockDim.z;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    int k = threadIdx.x + blockIdx.x * blockDim.x;
+    if (i >= a_1 || j >= a_3 || k >= a_2)
+        return;
+
+    int idx_A = i * a_2 + k;
+    int idx_B = k * a_3 + i;
+    int idx_C = i * a_3 + j;
+    C[idx_C] = A[idx_A] + B[idx_B];
+}
+
 float call_gpu() {
     int a_1 = 500, a_2 = 750, a_3 = 800;
-    int *A = (int *)malloc(sizeof(int) * a_1 * a_3);
-    int *B = (int *)malloc(sizeof(int) * a_1 * a_2);
-    int *C = (int *)malloc(sizeof(int) * a_2 * a_3);
+    size_t size_A = a_1 * a_3, size_B = a_2 * a_3, size_C = a_1 * a_3;
+    size_t mal_A = size_A * sizeof(int);
+    size_t mal_B = size_B * sizeof(int);
+    size_t mal_C = size_C * sizeof(int);
+
+    int *A = (int *)malloc(mal_A);
+    int *B = (int *)malloc(mal_B);
+    int *C = (int *)malloc(mal_C);
     if (!A || !B || !C) {
         perror("malloc");
         exit(EXIT_FAILURE);
@@ -115,25 +150,41 @@ float call_gpu() {
     fill_with_random(A, a_1 * a_3);
     fill_with_random(B, a_2 * a_3);
 
-    dim3 grid();
-    dim3 block(16, 16);
+    int *d_A, *d_B, *d_C;
+    CHECK_CUDA(cudaMalloc(&d_A, mal_A));
+    CHECK_CUDA(cudaMalloc(&d_B, mal_B));
+    CHECK_CUDA(cudaMalloc(&d_C, mal_C));
+    CHECK_CUDA(cudaMemcpy(d_A, A, mal_A, cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(d_B, B, mal_B, cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(d_C, C, mal_C, cudaMemcpyHostToDevice));
+
+    dim3 grid(a_1 / 8 + 1, a_3 / 8 + 1, a_2 / 8 + 1);
+    dim3 block(8, 8, 8);
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
     cudaEventRecord(start);
-    mat_mul(A, B, C);
+    mat_mul<<<grid, block>>>(d_A, d_B, d_C, a_1, a_2, a_3);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
     float ms = 0;
     cudaEventElapsedTime(&ms, start, stop);
 
-    if (!verify(A, B, C)) {
+    CHECK_CUDA(cudaMemcpy(A, d_A, mal_A, cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(B, d_B, mal_B, cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(C, d_C, mal_C, cudaMemcpyDeviceToHost));
+
+    if (!verify(A, B, C, a_1, a_2, a_3)) {
         std::cout << "Not valid";
         exit(EXIT_FAILURE);
     }
+
+    CHECK_CUDA(cudaFree(d_A));
+    CHECK_CUDA(cudaFree(d_B));
+    CHECK_CUDA(cudaFree(d_C));
 
     return ms;
 }
@@ -141,4 +192,6 @@ float call_gpu() {
 int main() {
     float ms = call_cpu();
     std::cout << "CPU execution time: " << ms << " ms" << std::endl;
+    float ms_gpu = call_gpu();
+    std::cout << "GPU execution time: " << ms_gpu << " ms" << std::endl;
 }
