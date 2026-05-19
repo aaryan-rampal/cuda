@@ -1,20 +1,20 @@
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include <vector>
 
 // Wrapper macro for CUDA error handling
-#define CHECK_CUDA(call) { \
-    cudaError_t err = call; \
-    if (err != cudaSuccess) { \
-        fprintf(stderr, "CUDA Error in %s at line %d: %s\n", __FILE__, __LINE__, cudaGetErrorString(err)); \
-        exit(EXIT_FAILURE); \
-    } \
-}
+#define CHECK_CUDA(call)                                                             \
+    {                                                                                \
+        cudaError_t err = call;                                                      \
+        if (err != cudaSuccess) {                                                    \
+            fprintf(stderr, "CUDA Error in %s at line %d: %s\n", __FILE__, __LINE__, \
+                    cudaGetErrorString(err));                                        \
+            exit(EXIT_FAILURE);                                                      \
+        }                                                                            \
+    }
 
-bool verify(const std::vector<std::vector<int>>& A,
-            const std::vector<std::vector<int>>& B,
-            const std::vector<std::vector<int>>& C
-    ) {
+bool verify(const std::vector<std::vector<int>> &A, const std::vector<std::vector<int>> &B,
+            const std::vector<std::vector<int>> &C) {
     assert(C.size() > 0);
 
     int a_1 = A.size(), a_2 = B.size(), a_3 = C[0].size();
@@ -39,7 +39,8 @@ bool verify(const std::vector<std::vector<int>>& A,
     return true;
 }
 
-void mat_mul(std::vector<std::vector<int>> &A, std::vector<std::vector<int>> &B, std::vector<std::vector<int>> &C) {
+void mat_mul(std::vector<std::vector<int>> &A, std::vector<std::vector<int>> &B,
+             std::vector<std::vector<int>> &C) {
     assert(C.size() > 0);
 
     int a_1 = A.size(), a_2 = B.size(), a_3 = C[0].size();
@@ -72,7 +73,7 @@ void fill_with_random(std::vector<int> &vec) {
     }
 }
 
-float call_cpu(){
+float call_cpu() {
     int a_1 = 500, a_2 = 750, a_3 = 800;
     std::vector<int> A(a_1 * a_2), B(a_2 * a_3), C(a_1 * a_3);
 
