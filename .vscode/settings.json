@@ -1,25 +1,46 @@
 {
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "*.cu": "cuda-cpp",
+    "*.cuh": "cuda-cpp"
+  },
 
-    "clangd.arguments": [
-      "--background-index",
-      "--clang-tidy",
-      "--completion-style=detailed",
-      "--header-insertion=iwyu"
-    ],
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
 
-    "editor.quickSuggestions": {
-      "other": true,
-      "comments": false,
-      "strings": false
-    },
+  "[cuda-cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
 
-    "editor.parameterHints.enabled": true,
-    "editor.hover.enabled": "on",
-    "editor.inlayHints.enabled": "on",
+  "C_Cpp.default.compilerPath": "/usr/local/cuda/bin/nvcc",
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.cStandard": "c17",
+  "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
 
-    "editor.semanticHighlighting.enabled": true,
-    "C_Cpp.enhancedColorization": "enabled"
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "/usr/local/cuda/include",
+    "/usr/local/cuda/targets/x86_64-linux/include"
+  ],
+
+  "C_Cpp.codeAnalysis.clangTidy.enabled": false,
+
+  "C_Cpp.clang_format_style": "file:${workspaceFolder}/.clang-format",
+
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+
+  "editor.parameterHints.enabled": true,
+  "editor.hover.enabled": "on",
+  "editor.inlayHints.enabled": "on",
+  "editor.semanticHighlighting.enabled": true,
+  "C_Cpp.enhancedColorization": "enabled"
 }
