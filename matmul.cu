@@ -79,14 +79,14 @@ void mat_mul(std::vector<std::vector<int>> &A, std::vector<std::vector<int>> &B,
 void fill_with_random(std::vector<std::vector<int>> &vec) {
     for (int i = 0; i < vec.size(); i++) {
         for (int j = 0; j < vec[i].size(); j++) {
-            vec[i][j] = rand() % 1000 + 1;
+            vec[i][j] = rand() % 10 + 1;
         }
     }
 }
 
 void fill_with_random(int *vec, int size) {
     for (int i = 0; i < size; i++) {
-        vec[i] = rand() % 1000 + 1;
+        vec[i] = rand() % 10 + 1;
     }
 }
 
@@ -127,13 +127,13 @@ __global__ void mat_mul(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
         return;
 
     int idx_A = i * a_2 + k;
-    int idx_B = k * a_3 + i;
+    int idx_B = k * a_3 + j;
     int idx_C = i * a_3 + j;
-    C[idx_C] = A[idx_A] + B[idx_B];
+    C[idx_C] += A[idx_A] + B[idx_B];
 }
 
 float call_gpu() {
-    int a_1 = 500, a_2 = 750, a_3 = 800;
+    int a_1 = 50, a_2 = 75, a_3 = 80;
     size_t size_A = a_1 * a_3, size_B = a_2 * a_3, size_C = a_1 * a_3;
     size_t mal_A = size_A * sizeof(int);
     size_t mal_B = size_B * sizeof(int);
@@ -149,6 +149,9 @@ float call_gpu() {
 
     fill_with_random(A, a_1 * a_3);
     fill_with_random(B, a_2 * a_3);
+    for (int i = 0; i < size_C; i++) {
+        C[i] = 0;
+    }
 
     int *d_A, *d_B, *d_C;
     CHECK_CUDA(cudaMalloc(&d_A, mal_A));
