@@ -36,7 +36,7 @@ int main(){
     // vector_add(out, a, b, N);
     int threadsPerBlock = 256;
     int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
-    vec_add<<<1, 256>>>(out, a, b, N);
+    vec_add<<<blocksPerGrid, threadsPerBlock>>>(out, a, b, N);
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         std::cerr << "Kernel launch error: " << cudaGetErrorString(err) << "\n";
