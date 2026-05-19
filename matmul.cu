@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
@@ -40,6 +41,21 @@ bool verify(const std::vector<std::vector<int>> &A, const std::vector<std::vecto
 }
 
 bool verify(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
+    auto print_matrix = [](const char *name, int *mat, int rows, int cols) {
+        std::cout << name << ":\n";
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                std::cout << mat[i * cols + j] << " ";
+            }
+            std::cout << "\n";
+        }
+        std::cout << "\n";
+    };
+
+    print_matrix("Matrix A", A, a_1, a_2);
+    print_matrix("Matrix B", B, a_2, a_3);
+    print_matrix("Matrix C (Result)", C, a_1, a_3);
+
     for (int i = 0; i < a_1; ++i) {
         for (int j = 0; j < a_3; ++j) {
             int expected = 0;
@@ -129,11 +145,13 @@ __global__ void mat_mul(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
     int idx_A = i * a_2 + k;
     int idx_B = k * a_3 + j;
     int idx_C = i * a_3 + j;
-    C[idx_C] += A[idx_A] + B[idx_B];
+    printf("i=%d j=%d k=%d A=%d B=%d C_before=%d C_after=%d\n", i, j, k, A[idx_A], B[idx_B],
+           C[idx_C], A[idx_A] * B[idx_B] + C[idx_C]);
+    C[idx_C] += A[idx_A] * B[idx_B];
 }
 
 float call_gpu() {
-    int a_1 = 50, a_2 = 75, a_3 = 80;
+    int a_1 = 3, a_2 = 3, a_3 = 3;
     size_t size_A = a_1 * a_3, size_B = a_2 * a_3, size_C = a_1 * a_3;
     size_t mal_A = size_A * sizeof(int);
     size_t mal_B = size_B * sizeof(int);
