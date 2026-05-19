@@ -63,12 +63,44 @@ void fill_with_random(std::vector<std::vector<int>> &vec) {
         for (int j = 0; j < vec[i].size(); j++) {
             vec[i][j] = rand() % 1000 + 1;
         }
-
     }
 }
 
-float call_cuda(){
-    int a_1 = 50, a_2 = 75, a_3 = 80;
+void fill_with_random(std::vector<int> &vec) {
+    for (int i = 0; i < vec.size(); i++) {
+        vec[i] = rand() % 1000 + 1;
+    }
+}
+
+float call_cpu(){
+    int a_1 = 500, a_2 = 750, a_3 = 800;
+    std::vector<int> A(a_1 * a_2), B(a_2 * a_3), C(a_1 * a_3);
+
+    fill_with_random(A);
+    fill_with_random(B);
+
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    cudaEventRecord(start);
+    mat_mul(A, B, C);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    float ms = 0;
+    cudaEventElapsedTime(&ms, start, stop);
+
+    if (!verify(A, B, C)) {
+        std::cout << "Not valid";
+        exit(EXIT_FAILURE);
+    }
+
+    return ms;
+}
+
+float call_gpu() {
+    int a_1 = 500, a_2 = 750, a_3 = 800;
     std::vector<std::vector<int>> A(a_1, std::vector<int>(a_2, 0));
     std::vector<std::vector<int>> B(a_2, std::vector<int>(a_3, 0));
     std::vector<std::vector<int>> C(a_1, std::vector<int>(a_3, 0));
@@ -97,6 +129,6 @@ float call_cuda(){
 }
 
 int main() {
-    float ms = call_cuda();
+    float ms = call_cpu();
     std::cout << "CPU execution time: " << ms << " ms" << std::endl;
 }
