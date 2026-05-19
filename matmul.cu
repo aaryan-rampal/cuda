@@ -52,9 +52,9 @@ bool verify(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
         std::cout << "\n";
     };
 
-    print_matrix("Matrix A", A, a_1, a_2);
-    print_matrix("Matrix B", B, a_2, a_3);
-    print_matrix("Matrix C (Result)", C, a_1, a_3);
+    // print_matrix("Matrix A", A, a_1, a_2);
+    // print_matrix("Matrix B", B, a_2, a_3);
+    // print_matrix("Matrix C (Result)", C, a_1, a_3);
 
     for (int i = 0; i < a_1; ++i) {
         for (int j = 0; j < a_3; ++j) {
@@ -136,18 +136,15 @@ float call_cpu() {
 }
 
 __global__ void mat_mul(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
-    int i = threadIdx.z + blockIdx.z * blockDim.z;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    int k = threadIdx.x + blockIdx.x * blockDim.x;
-    if (i >= a_1 || j >= a_3 || k >= a_2)
+    int i = threadIdx.y + blockIdx.y * blockDim.y;
+    int j = threadIdx.x + blockIdx.x * blockDim.x;
+    if (j >= a_3 || i >= a_1)
         return;
 
-    int idx_A = i * a_2 + k;
-    int idx_B = k * a_3 + j;
     int idx_C = i * a_3 + j;
-    printf("i=%d j=%d k=%d A=%d B=%d C_before=%d C_after=%d\n", i, j, k, A[idx_A], B[idx_B],
-           C[idx_C], A[idx_A] * B[idx_B] + C[idx_C]);
-    C[idx_C] += A[idx_A] * B[idx_B];
+    for (int k = 0; k < a_2; k++) {
+        C[idx_C] += A[i * a_2 + k] * B[k * a_3 + j];
+    }
 }
 
 float call_gpu() {
@@ -179,8 +176,9 @@ float call_gpu() {
     CHECK_CUDA(cudaMemcpy(d_B, B, mal_B, cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(d_C, C, mal_C, cudaMemcpyHostToDevice));
 
-    dim3 grid(a_1 / 8 + 1, a_3 / 8 + 1, a_2 / 8 + 1);
-    dim3 block(8, 8, 8);
+    int threads = 16;
+    dim3 grid(a_1 / threads + 1, a_3 / threads + 1);
+    dim3 block(threads, threads);
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
