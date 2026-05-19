@@ -101,7 +101,7 @@ float call_cuda(bool reversed){
     cudaEventRecord(start);
 
     if (reversed) {
-        mat_add_cuda_unoptimized<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
+        mat_add_cuda_reversed<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
     } else {
         mat_add_cuda<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
     }
