@@ -67,15 +67,17 @@ void fill_with_random(std::vector<std::vector<int>> &vec) {
     }
 }
 
-void fill_with_random(std::vector<int> &vec) {
-    for (int i = 0; i < vec.size(); i++) {
+void fill_with_random(int *vec, int size) {
+    for (int i = 0; i < size; i++) {
         vec[i] = rand() % 1000 + 1;
     }
 }
 
 float call_cpu() {
-    int a_1 = 500, a_2 = 750, a_3 = 800;
-    std::vector<int> A(a_1 * a_2), B(a_2 * a_3), C(a_1 * a_3);
+    int a_1 = 50, a_2 = 75, a_3 = 80;
+    std::vector<std::vector<int>> A(a_1, std::vector<int>(a_2, 0));
+    std::vector<std::vector<int>> B(a_2, std::vector<int>(a_3, 0));
+    std::vector<std::vector<int>> C(a_1, std::vector<int>(a_3, 0));
 
     fill_with_random(A);
     fill_with_random(B);
@@ -102,12 +104,19 @@ float call_cpu() {
 
 float call_gpu() {
     int a_1 = 500, a_2 = 750, a_3 = 800;
-    std::vector<std::vector<int>> A(a_1, std::vector<int>(a_2, 0));
-    std::vector<std::vector<int>> B(a_2, std::vector<int>(a_3, 0));
-    std::vector<std::vector<int>> C(a_1, std::vector<int>(a_3, 0));
+    int *A = (int *)malloc(sizeof(int) * a_1 * a_3);
+    int *B = (int *)malloc(sizeof(int) * a_1 * a_2);
+    int *C = (int *)malloc(sizeof(int) * a_2 * a_3);
+    if (!A || !B || !C) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
 
-    fill_with_random(A);
-    fill_with_random(B);
+    fill_with_random(A, a_1 * a_3);
+    fill_with_random(B, a_2 * a_3);
+
+    dim3 grid();
+    dim3 block(16, 16);
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
