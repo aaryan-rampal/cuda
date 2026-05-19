@@ -78,7 +78,22 @@ int main(){
 
     dim3 grid(width / 16 + 1, height / 16 + 1);
     dim3 block(16, 16);
+
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    cudaEventRecord(start);
+
     mat_add_cuda<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
+
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    float ms = 0;
+    cudaEventElapsedTime(&ms, start, stop);
+
+    std::cout << "Kernel time: " << ms << " ms\n";
 
     cudaMemcpy(A.data(), d_A, size, cudaMemcpyDeviceToHost);
     cudaMemcpy(B.data(), d_B, size, cudaMemcpyDeviceToHost);
