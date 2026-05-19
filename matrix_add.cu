@@ -38,12 +38,19 @@ bool verify(const std::vector<int>& A,
 }
 
 __global__ void mat_add_cuda(int *A, int *B, int *C, int width, int height, int n) {
+    // threadIdx.x moves fastest
+    // for a 2D array A[i][j], we increment cols first then rows
+    // i.e. threadIdx.x -> col, threadIdx.y -> row
+    // for (row in threadIdx.y) {
+    //   for (col in threadIdx.x) {
+    //   }
+    // }
     int col = threadIdx.x + blockDim.x * blockIdx.x;
     int row = threadIdx.y + blockDim.y * blockIdx.y;
-    int i = row * width + col;
-
-    if (i >= n)
+    if (row >= height || col >= width)
         return;
+
+    int i = row * width + col;
 
     C[i] = A[i] + B[i];
 }
@@ -69,8 +76,8 @@ int main(){
     cudaMemcpy(d_B, B.data(), size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_C, C.data(), size, cudaMemcpyHostToDevice);
 
-    dim3 grid(width / 8 + 1, height / 8 + 1);
-    dim3 block(8,8);
+    dim3 grid(width / 16 + 1, height / 16 + 1);
+    dim3 block(16, 16);
     mat_add_cuda<<<grid, block>>>(d_A, d_B, d_C, width, height, n);
 
     cudaMemcpy(A.data(), d_A, size, cudaMemcpyDeviceToHost);
