@@ -15,6 +15,14 @@
         }                                                                            \
     }
 
+/**
+ * Verifies the result of matrix multiplication for std::vector<std::vector<int>> representation.
+ *
+ * @param A First input matrix of size a_1 x a_2.
+ * @param B Second input matrix of size a_2 x a_3.
+ * @param C Result matrix of size a_1 x a_3 to be verified.
+ * @return true if C equals A * B, false otherwise.
+ */
 bool verify(const std::vector<std::vector<int>> &A, const std::vector<std::vector<int>> &B,
             const std::vector<std::vector<int>> &C) {
     assert(C.size() > 0);
@@ -41,6 +49,17 @@ bool verify(const std::vector<std::vector<int>> &A, const std::vector<std::vecto
     return true;
 }
 
+/**
+ * Verifies the result of matrix multiplication for flattened array representation.
+ *
+ * @param A First input matrix (flattened) of size a_1 x a_2.
+ * @param B Second input matrix (flattened) of size a_2 x a_3.
+ * @param C Result matrix (flattened) of size a_1 x a_3 to be verified.
+ * @param a_1 Number of rows in matrix A and matrix C.
+ * @param a_2 Number of columns in matrix A and rows in matrix B.
+ * @param a_3 Number of columns in matrix B and matrix C.
+ * @return true if C equals A * B, false otherwise.
+ */
 bool verify(int *A, int *B, int *C, int a_1, int a_2, int a_3) {
     auto print_matrix = [](const char *name, int *mat, int rows, int cols) {
         std::cout << name << ":\n";
