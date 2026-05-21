@@ -5,7 +5,7 @@ NVCC := "nvcc"
 CC   := "gcc"
 
 # Flags
-NVCC_FLAGS := "-O3 -arch=sm_80"
+NVCC_FLAGS := "-O3 -arch=native"
 CC_FLAGS   := "-O3"
 
 BIN_DIR    := "bin"
