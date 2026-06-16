@@ -31,6 +31,21 @@ up toward the ridge point too.
 This is the outer-product / register-blocking formulation of GEMM that every
 high-performance library uses (including cuBLAS, just with more levels).
 
+```mermaid
+flowchart TB
+    rm["regM[0..TM-1]<br/>TM loads from As"]
+    rn["regN[0..TN-1]<br/>TN loads from Bs"]
+    subgraph op["outer product → TM×TN FMAs per k (all in registers)"]
+        direction TB
+        grid["acc[i][j] += regM[i] · regN[j]<br/><br/>regN →  n0  n1  n2  ...  n7<br/>regM↓ m0 ▒▒ ▒▒ ▒▒ ... ▒▒<br/>      m1 ▒▒ ▒▒ ▒▒ ... ▒▒<br/>      ..  ▒▒ ▒▒ ▒▒ ... ▒▒<br/>      m7 ▒▒ ▒▒ ▒▒ ... ▒▒"]
+    end
+    rm --> grid
+    rn --> grid
+```
+
+`TM+TN = 16` shared loads produce `TM·TN = 64` FMAs — that ratio (4) is the
+intensity win, and it's why the reused operands live in registers.
+
 ## Read this
 
 - Simon Boehm worklog, **"Kernel 5: 2D Blocktiling"** + its register-blocking

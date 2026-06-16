@@ -26,6 +26,23 @@ threads.
 The rule: **make consecutive threads in a warp (consecutive `threadIdx.x`) touch
 consecutive addresses.**
 
+```mermaid
+flowchart TB
+    subgraph good["COALESCED — fast kernel (your matrix_add, 1.54 ms)"]
+        direction LR
+        gt["warp: t0 t1 t2 ... t31"] --> gm["1 transaction<br/>(one 128-byte line)"]
+        gm --> gA["addr: [0][1][2]...[31] — contiguous"]
+    end
+    subgraph bad["STRIDED — reversed kernel (2.72 ms)"]
+        direction LR
+        bt["warp: t0 t1 t2 ... t31"] --> bm["up to 32 transactions<br/>(one useful float each)"]
+        bm --> bA["addr: [0][+width][+2·width]... — scattered"]
+    end
+    good ~~~ bad
+    style good fill:#d6ffd6
+    style bad fill:#ffd6d6
+```
+
 Now recall module 00: a warp is consecutive linear indices = consecutive
 `threadIdx.x` (x is fastest). And row-major storage means address increases with
 *column*. So: **`threadIdx.x` should map to the column**, so a warp sweeps a

@@ -27,6 +27,19 @@ layout, i.e. `As[k*BM + m]`), then the `TM` values a thread needs for fixed `k`
 are *contiguous* in `m` → one `float4` (or two) loads them. Bonus: the *DRAM*
 load of `A` becomes coalesced when paired with `float4` reads of a row of `A`.
 
+```mermaid
+flowchart TB
+    subgraph before["As[m][k] (module 05) — regM stride = BK"]
+        b["regM[i] = As[(row·TM+i)·BK + k]<br/>i: 0→1 jumps BK floats ✗ not vectorizable"]
+    end
+    subgraph after["As[k][m] transposed (module 06) — regM contiguous"]
+        a["regM[0..3] = float4(As[k·BM + row·TM])<br/>i: 0→1→2→3 contiguous ✓ ONE 128-bit load"]
+    end
+    before -->|"transpose on load"| after
+    style before fill:#ffd6d6
+    style after fill:#d6ffd6
+```
+
 **3. Bank conflicts.** Shared memory is 32 banks, 4 bytes wide; bank =
 `(addr/4) % 32`. If the 32 threads of a warp hit 32 *different* banks → full
 speed. If `n` threads hit the *same* bank (different addresses) → `n`-way

@@ -23,6 +23,11 @@ Each module has the same shape:
 6. **Build & measure** — compile it, run it, look at the timing.
 7. **Solutions** — behind `<details>` spoilers.
 
+Most modules include **Mermaid diagrams** (the ```` ```mermaid ```` blocks).
+GitHub renders these inline when you view the file in the web UI — so read these
+on GitHub (or any Mermaid-aware Markdown viewer / VS Code with a Mermaid
+extension) to get the pictures, not just the code fences.
+
 **The one rule:** write your answer *before* you open the spoiler. Every time.
 You already proved this works — you discovered memory coalescing on your own in
 `matrix_add.cu` (your "normal" 1.54 ms vs "reversed" 2.72 ms experiment).

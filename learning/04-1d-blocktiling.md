@@ -30,6 +30,19 @@ fastest storage on the chip and have no bank-conflict issues. Intensity climbs
 again — and because each thread does `TM×` the work, you get the big tile with
 a small, high-occupancy block.
 
+```mermaid
+flowchart LR
+    tb["tmpB = Bs[k][col]<br/>(ONE shared load → register)"]
+    subgraph col["one thread owns a column of TM=8 results (in registers)"]
+        r0["acc[0] += As[row·8+0][k]·tmpB"]
+        r1["acc[1] += As[row·8+1][k]·tmpB"]
+        rd["...  (reuse tmpB 8×)"]
+        r7["acc[7] += As[row·8+7][k]·tmpB"]
+    end
+    tb --> r0 & r1 & rd & r7
+    style tb fill:#fff3c4
+```
+
 ## Read this
 
 - Simon Boehm worklog, **"Kernel 4: 1D Blocktiling"** — read it slowly; the

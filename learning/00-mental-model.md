@@ -18,6 +18,20 @@ You choose these in `<<<grid, block>>>`.
 **Hardware hierarchy** (what runs): `GPU` → `SM` (Streaming Multiprocessor) →
 `warp` (32 threads) → `CUDA core`.
 
+```mermaid
+flowchart LR
+    subgraph SW["What you write (software)"]
+        G["grid"] --> B["block"] --> T["thread"]
+    end
+    subgraph HW["What runs (hardware) — your RTX 3060"]
+        GPU["GPU<br/>28 SMs"] --> SM["SM<br/>≤1536 threads<br/>≤16 blocks"]
+        SM --> W["warp<br/>32 threads, lockstep"]
+        W --> C["CUDA core"]
+    end
+    B -. "a block is placed on exactly one SM<br/>(an SM holds many blocks)" .-> SM
+    T -. "32 threads = 1 warp" .-> W
+```
+
 The mapping between them is the source of all performance intuition:
 
 - A **block** is assigned to **one SM** and stays there until it finishes. A
@@ -91,7 +105,24 @@ int j /*col*/ = threadIdx.x + blockIdx.x * blockDim.x;
 **Exercise 00.2 — draw the warp.** On paper, draw the 16×16 block as a grid of
 cells. Shade the 32 threads that form **warp 0**. Then answer: do the 32 threads
 of warp 0 access *consecutive* `col` values, or do they jump? You'll use this
-exact picture in module 02.
+exact picture in module 02. Here's the layout to reproduce and reason about
+(linear id `= y*16 + x`, so warp 0 = ids 0–31 = rows y=0 and y=1):
+
+```mermaid
+flowchart TB
+    subgraph block["16×16 block — each row is 16 threads (x = 0..15)"]
+        direction TB
+        r0["y=0 :  x=0..15   → linear ids 0..15  ─┐ warp 0"]
+        r1["y=1 :  x=0..15   → linear ids 16..31 ─┘ (32 threads)"]
+        r2["y=2 :  x=0..15   → linear ids 32..47  ─┐ warp 1"]
+        r3["y=3 :  x=0..15   → linear ids 48..63  ─┘"]
+        rdots["... y=4..15 → warps 2..7"]
+    end
+    r0 --- r1 --- r2 --- r3 --- rdots
+```
+
+Key takeaway from the picture: within each row, `x` (and therefore `col`) is
+**consecutive** — that's the seed of memory coalescing in module 02.
 
 **Exercise 00.3 — predict occupancy.** Each thread in your naive kernel uses
 maybe ~30 registers (you'll measure the real number in module 06 with

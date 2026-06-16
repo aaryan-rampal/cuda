@@ -39,6 +39,28 @@ The crossover is the **ridge point** `I* = π / β`. To use a GPU well you need
 the ridge** — and you raise it by reusing each byte you load many times instead
 of re-fetching it from DRAM.
 
+Here is your 3060's roofline (you'll derive every number below). The rising line
+is the memory roof `I×β`; it flattens at the compute roof `π`. The bend is the
+ridge at `I*≈35`. Each kernel in this workbook is a point that climbs this line
+left-to-right:
+
+```mermaid
+xychart-beta
+    title "RTX 3060 roofline — performance is capped by the line"
+    x-axis "Arithmetic intensity (FLOP/byte)" [0, 5, 10, 15, 20, 25, 30, 35, 40]
+    y-axis "GFLOP/s" 0 --> 13000
+    line [0, 1800, 3600, 5400, 7200, 9000, 10800, 12600, 12700]
+```
+
+```mermaid
+flowchart LR
+    naive["naive<br/>I≈0.25<br/>~1% peak"] -->|"tile (×BK)"| tiled["tiled<br/>I≈8"]
+    tiled -->|"register blocking"| reg["1D/2D tiling<br/>I↑"]
+    reg -->|"cross the ridge I*≈35"| compute["compute-bound<br/>~80–95% peak"]
+    style naive fill:#ffd6d6
+    style compute fill:#d6ffd6
+```
+
 ## Read this
 
 - **Williams, Waterman, Patterson (2009), "Roofline: an insightful visual

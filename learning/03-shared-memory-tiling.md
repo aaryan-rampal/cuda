@@ -29,6 +29,39 @@ Why it wins: in naive matmul, each element of `A` is read from DRAM `N` times
 **once per tile-row it participates in**, i.e. `N/BK` times — a factor of `BK`
 fewer DRAM reads. Reuse moved from DRAM to shared memory.
 
+One output tile is the sum of products of tile-pairs marched along `K`:
+
+```mermaid
+flowchart LR
+    subgraph A["A (rows of this block)"]
+        a0["A-tile @k0"]:::t
+        a1["A-tile @k1"]:::t
+        a2["..."]
+    end
+    subgraph B["B (cols of this block)"]
+        b0["B-tile @k0"]:::t
+        b1["B-tile @k1"]:::t
+        b2["..."]
+    end
+    a0 & b0 --> p0["As·Bs"]
+    a1 & b1 --> p1["As·Bs"]
+    p0 --> sum["C-tile += (accumulate over all K-chunks)"]
+    p1 --> sum
+    classDef t fill:#dde6ff
+```
+
+And the per-chunk loop every block runs — the two barriers are not optional:
+
+```mermaid
+flowchart TB
+    start(["for k0 in 0..K step BK"]) --> load["each thread loads 1 elem of As, 1 of Bs<br/>from DRAM → shared memory"]
+    load --> s1{{"__syncthreads()<br/>(tile fully loaded?)"}}
+    s1 --> comp["inner loop: acc += As[ty][k]·Bs[k][tx]<br/>(reads only shared memory)"]
+    comp --> s2{{"__syncthreads()<br/>(safe to overwrite tile?)"}}
+    s2 --> start
+    start -->|done| write["write acc → C once"]
+```
+
 ## Read this
 
 - NVIDIA blog, **"Using Shared Memory in CUDA C/C++"** —

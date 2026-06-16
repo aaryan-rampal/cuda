@@ -17,6 +17,13 @@ double buffering, and on Ampere can dispatch to tensor cores via TF32). Beating
 it isn't the goal; getting **within 80–95%** with code you understand line by
 line is a genuinely strong result and a great interview story.
 
+```mermaid
+flowchart LR
+    rm["your C[M×N]<br/>row-major"] -->|"same bytes = column-major Cᵀ"| trick["ask cuBLAS for Cᵀ = Bᵀ·Aᵀ<br/>by SWAPPING A,B args<br/>and passing N,M,K"]
+    trick --> out["result lands in C as row-major A·B<br/>(no data transpose needed)"]
+    style trick fill:#fff3c4
+```
+
 **The column-major gotcha.** cuBLAS follows Fortran/BLAS convention:
 **column-major** storage. Your matrices are **row-major** (C convention). The
 clean trick: a row-major `M×N` matrix *is* the column-major `N×M` transpose of
