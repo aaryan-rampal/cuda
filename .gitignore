@@ -6,3 +6,7 @@
 *.fatbin
 *.out
 bin/
+
+# python
+__pycache__/
+*.pyc
