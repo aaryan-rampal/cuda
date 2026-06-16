@@ -1,0 +1,11 @@
+# Your work goes here.
+#
+# This directory is intentionally empty. The workbook (../README.md) has YOU
+# write the kernels as exercises:
+#   - sgemm.cu   (modules 02-06: naive -> tiled -> 1D -> 2D -> vectorized)
+#   - bench.cu   (module 07: head-to-head vs cuBLAS)
+#
+# Build, e.g.:
+#   nvcc -O3 -arch=native learning/kernels/sgemm.cu -o bin/sgemm && ./bin/sgemm
+#   nvcc -O3 -arch=native --ptxas-options=-v learning/kernels/sgemm.cu -o bin/sgemm
+#   nvcc -O3 -arch=native learning/kernels/bench.cu -o bin/bench -lcublas && ./bin/bench
