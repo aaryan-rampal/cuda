@@ -23,6 +23,15 @@ Each module has the same shape:
 6. **Build & measure** — compile it, run it, look at the timing.
 7. **Solutions** — behind `<details>` spoilers.
 
+**Two ways to work through this:**
+- **Read on GitHub** — the `NN-*.md` modules below render prose + Mermaid + the
+  `<details>` solution spoilers inline. Do the exercises on paper / in your editor.
+- **Run it like a course** — open [`notebooks/`](notebooks/README.md): the same
+  modules as `# %%` notebooks (VS Code / JupyterLab) with **autograded tests**.
+  Fill in a `TODO`, run the test cell, get ✅/❌ with a hint, iterate — including
+  a `check_cuda(...)` that compiles your kernel with `nvcc`, verifies it, and
+  prints GFLOP/s. Start there if you like immediate feedback.
+
 Most modules include **Mermaid diagrams** (the ```` ```mermaid ```` blocks).
 GitHub renders these inline when you view the file in the web UI — so read these
 on GitHub (or any Mermaid-aware Markdown viewer / VS Code with a Mermaid
